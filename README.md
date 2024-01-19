@@ -1,5 +1,5 @@
 # Pyinstaller GUI
-[English](README.md)  
+[zh-CN](README.zh-CN.md)  
 A project that provides a GUI version of [pyinstaller](https://pyinstaller.org).
 
 This project uses the [tkinter](https://docs.python.org/3/library/tkinter.html) and [pyinstaller](https://pyinstaller.org).
