@@ -5,8 +5,9 @@ import tkinter as tk
 import tkinter.filedialog
 
 
-NAME = "Pyinstaller-GUI"
 VERSION = (0, 0, 1)
+NAME = f"Pyinstaller GUI v{VERSION[0]}.{VERSION[1]}.{VERSION[2]}"
+SIZE = WIDTH, HEIGHT = 500, 500
 
 
 class GUI:
@@ -23,20 +24,23 @@ class GUI:
 
         # 参数设置
         self.window.title(NAME)
+        # self.window.geometry(f"{WIDTH}x{HEIGHT}")
 
     def set_frame(self) -> None:
         """设置组件"""
+        # 项目名称
+        self.project_StringVar = tk.StringVar()
+
+        project_Label = tk.Label(master=self.window, text="project name")
+        project_Entry = tk.Entry(master=self.window, textvariable=self.project_StringVar)
+   
         # .py 文件路径
         self.py_StringVar = tk.StringVar()
 
-        path_Label = tk.Label(master=self.window, text=".py path")
-        path_Entry = tk.Entry(master=self.window, textvariable=self.py_StringVar)
-        path_Button = tk.Button(master=self.window, text="choose",
+        py_Label = tk.Label(master=self.window, text=".py path")
+        py_Entry = tk.Entry(master=self.window, textvariable=self.py_StringVar)
+        py_Button = tk.Button(master=self.window, text="choose",
                                 command=lambda:self.file_choose(("Python File", ".py")))
-
-        path_Label.grid(row=0, column=0)
-        path_Entry.grid(row=0, column=1)
-        path_Button.grid(row=0, column=2)
         
         # .ico 文件路径
         self.ico_StringVar = tk.StringVar()
@@ -46,24 +50,37 @@ class GUI:
         ico_Button = tk.Button(master=self.window, text="choose",
                                 command=lambda:self.file_choose(("ICO File", ".ico")))
 
-        ico_Label.grid(row=1, column=0)
-        ico_Entry.grid(row=1, column=1)
-        ico_Button.grid(row=1, column=2)
+        # 运行及参数
+        self.run_StringVar = tk.StringVar()
 
-        # 运行
         run_Button = tk.Button(master=self.window, text="Run",
                                command=self.run_pyinstaller)
-        
-        run_Button.grid(row=2, columnspan=3)
+        run_Entry = tk.Entry(master=self.window, textvariable=self.run_StringVar)
 
-        # 输出
-        self.out_StringVar = tk.StringVar()
+        # 更改时刷新
+        project_Entry.bind("<KeyRelease>", self.update_run_Entry)
+        py_Entry.bind("<KeyRelease>", self.update_run_Entry)
+        ico_Entry.bind("<KeyRelease>", self.update_run_Entry)
 
-        out_Text = tk.Text(master=self.window)
+        # 布局
+        project_Label.grid(row=0, column=0)
+        project_Entry.grid(row=0, column=1, ipadx=10)
+
+        py_Label.grid(row=1, column=0)
+        py_Entry.grid(row=1, column=1, ipadx=10)
+        py_Button.grid(row=1, column=2)
+
+        ico_Label.grid(row=2, column=0)
+        ico_Entry.grid(row=2, column=1, ipadx=10)
+        ico_Button.grid(row=2, column=2)
+
+        run_Button.grid(row=3, columnspan=3)
+        run_Entry.grid(row=4, column=0, columnspan=3, padx=10, sticky=tk.N + tk.S + tk.W + tk.E)
 
     def loop_window(self) -> None:
         """窗口循环"""
         self.window.mainloop()
+
 
     def file_choose(self, filetype: tuple) -> None:
         """打开文件管理器选择文件"""
@@ -76,18 +93,28 @@ class GUI:
             # 没有选择文件
             pass
 
-    def run_pyinstaller(self) -> None:
-        """运行pyinstaller"""
+        self.update_run_Entry()
+
+    def update_run_Entry(self, event=None) -> None:
+        """刷新run_Entry的内容"""
+        project_name = self.project_StringVar.get()
         py_path = self.py_StringVar.get()
         ico_path = self.ico_StringVar.get()
 
         command = f"pyinstaller {py_path}"
 
-        if ico_path != '':
+        if project_name.strip(' ') != '':
+            # 设置项目名称
+            command += f" -n {project_name}"
+        if ico_path.strip(' ') != '':
             # 设置图标
             command += f" -i {ico_path}"
+        
+        self.run_StringVar.set(value=command)
 
-        print(command)
+    def run_pyinstaller(self) -> None:
+        """运行pyinstaller"""
+        self.out_file = popen(cmd=self.run_StringVar.get(), mode="r", buffering=-1)
 
 
 if __name__ == "__main__":
